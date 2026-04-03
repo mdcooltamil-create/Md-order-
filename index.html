@@ -3,52 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md Shop - Track Order</title>
+    <title>Md Shop - Track Your Order</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #f0f2f5; padding: 20px; }
-        .box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #result { margin-top: 20px; font-weight: bold; padding: 10px; border-radius: 8px; display: none; }
+        /* இணையதளத்தின் தோற்றம் (Design) */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background-color: #f0f2f5; 
+            padding: 20px; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+        }
+        .track-container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            max-width: 400px; 
+            width: 100%; 
+            animation: fadeIn 0.5s; 
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        h2 { color: #333; margin-bottom: 5px; }
+        p.subtitle { color: #777; font-size: 14px; margin-bottom: 25px; }
+
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid #eee; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            margin-bottom: 20px;
+            text-align: center; 
+            font-weight: bold; 
+        }
+        input:focus { border-color: #007bff; outline: none; }
+
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold; 
+        }
+
+        /* ரிசல்ட் காட்டும் பெட்டி */
+        #statusBox { 
+            margin-top: 25px; 
+            padding: 20px; 
+            border-radius: 12px; 
+            display: none; 
+            font-size: 18px; 
+            font-weight: bold;
+        }
+        .status-loading { background-color: #f8f9fa; color: #666; }
+        .status-found { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-notfound { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .footer-note { margin-top: 25px; font-size: 13px; color: #999; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>Order Tracking</h2>
-        <input type="text" id="orderID" placeholder="Enter ID (eg: md20041)">
-        <button onclick="check()">Track Now</button>
-        <div id="result"></div>
+    <div class="track-container">
+        <div style="font-size: 50px; margin-bottom: 10px;">📦</div>
+        <h2>Md Shop Tracking</h2>
+        <p class="subtitle">உங்கள் Order ID-ஐ உள்ளிட்டு நிலையை அறியவும்</p>
+
+        <input type="text" id="orderID" placeholder="உதாரணம்: md20041" autocomplete="off">
+        <button onclick="trackOrder()">Track Now</button>
+
+        <div id="statusBox"></div>
+
+        <div class="footer-note">
+            உதவிக்கு: 📞 9488934686
+        </div>
     </div>
 
     <script>
-        // உங்கள் Apps Script லிங்க்கை இங்கே போடவும்
+        // உங்கள் சரியான லிங்க் இங்கே இணைக்கப்பட்டுள்ளது
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAf9DpXznoYQbd8E_cqvv6ZDru8zo_442-WU93LEPEUg9svcbzUAxlFICyy1X2twkp/exec";
 
-        async function check() {
-            let id = document.getElementById("orderID").value;
-            let resDiv = document.getElementById("result");
-            if(!id) return alert("ID-ஐ உள்ளிடவும்");
+        async function trackOrder() {
+            const idInput = document.getElementById("orderID");
+            const statusBox = document.getElementById("statusBox");
+            const id = idInput.value.trim();
 
-            resDiv.style.display = "block";
-            resDiv.innerText = "தேடப்படுகிறது...";
-            resDiv.style.background = "#eee";
+            if (!id) {
+                alert("தயவுசெய்து ஒரு ID-ஐ உள்ளிடவும்!");
+                return;
+            }
+
+            // தேடும் போது காட்டும் மெசேஜ்
+            statusBox.style.display = "block";
+            statusBox.className = "status-loading";
+            statusBox.innerText = "தேடப்படுகிறது... 🔍";
 
             try {
-                let response = await fetch(SCRIPT_URL + "?id=" + id);
-                let text = await response.text();
-                
-                if(text === "Not Found") {
-                    resDiv.innerText = "❌ ஆர்டர் ஐடி இல்லை!";
-                    resDiv.style.background = "#ffebee";
+                // கூகுள் ஷீட்டில் இருந்து தகவலைப் பெறுதல்
+                const response = await fetch(SCRIPT_URL + "?id=" + id);
+                const result = await response.text();
+
+                if (result === "Not Found" || result === "") {
+                    statusBox.className = "status-notfound";
+                    statusBox.innerText = "❌ இந்த ஐடி (ID) கண்டறியப்படவில்லை!";
                 } else {
-                    resDiv.innerText = "📦 நிலை: " + text;
-                    resDiv.style.background = "#e8f5e9";
+                    statusBox.className = "status-found";
+                    statusBox.innerText = "📦 நிலை (Status): " + result;
                 }
-            } catch(e) {
-                resDiv.innerText = "⚠️ இணைப்பு தோல்வி!";
+            } catch (error) {
+                statusBox.className = "status-notfound";
+                statusBox.innerText = "⚠️ இணைப்பு தோல்வி! மீண்டும் முயற்சிக்கவும்.";
             }
         }
+
+        // கீபோர்டில் Enter அழுத்தினால் வேலை செய்யும்
+        document.getElementById("orderID").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") trackOrder();
+        });
     </script>
+
 </body>
 </html>
