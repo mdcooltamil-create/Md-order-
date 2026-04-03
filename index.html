@@ -3,19 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md Shop - Track Your Order</title>
+    <title>Md Shop - Track Order</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f0f2f5; padding: 20px; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .track-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; width: 100%; animation: fadeIn 0.5s; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        body { font-family: sans-serif; text-align: center; background-color: #f0f2f5; padding: 20px; }
+        .box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #result { margin-top: 20px; font-weight: bold; padding: 10px; border-radius: 8px; display: none; }
+    </style>
+</head>
+<body>
 
-        h2 { color: #333; margin-bottom: 5px; }
-        p.subtitle { color: #777; font-size: 14px; margin-bottom: 25px; }
+    <div class="box">
+        <h2>Order Tracking</h2>
+        <input type="text" id="orderID" placeholder="Enter ID (eg: md20041)">
+        <button onclick="check()">Track Now</button>
+        <div id="result"></div>
+    </div>
 
-        .input-group { position: relative; margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; transition: 0.3s; text-align: center; font-weight: bold; }
-        input:focus { border-color: #007bff; outline: none; box-shadow: 0 0 8px rgba(0,123,255,0.1); }
+    <script>
+        // உங்கள் Apps Script லிங்க்கை இங்கே போடவும்
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAf9DpXznoYQbd8E_cqvv6ZDru8zo_442-WU93LEPEUg9svcbzUAxlFICyy1X2twkp/exec";
 
-        button { width: 100%; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; box-shadow: 0
+        async function check() {
+            let id = document.getElementById("orderID").value;
+            let resDiv = document.getElementById("result");
+            if(!id) return alert("ID-ஐ உள்ளிடவும்");
+
+            resDiv.style.display = "block";
+            resDiv.innerText = "தேடப்படுகிறது...";
+            resDiv.style.background = "#eee";
+
+            try {
+                let response = await fetch(SCRIPT_URL + "?id=" + id);
+                let text = await response.text();
                 
+                if(text === "Not Found") {
+                    resDiv.innerText = "❌ ஆர்டர் ஐடி இல்லை!";
+                    resDiv.style.background = "#ffebee";
+                } else {
+                    resDiv.innerText = "📦 நிலை: " + text;
+                    resDiv.style.background = "#e8f5e9";
+                }
+            } catch(e) {
+                resDiv.innerText = "⚠️ இணைப்பு தோல்வி!";
+            }
+        }
+    </script>
+</body>
+</html>
