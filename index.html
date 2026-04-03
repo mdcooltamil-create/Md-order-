@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Md Shop - Track & Order</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f0f2f5; padding: 15px; margin: 0; }
+        .page { display: none; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: 15px auto; animation: fadeIn 0.4s; }
+        #page1 { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: #333; margin-bottom: 10px; }
+        p { color: #666; font-size: 14px; }
+
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        button, .whatsapp-btn { width: 100%; padding: 14px; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; display: block; text-decoration: none; box-sizing: border-box; }
+        
+        /* Track Order Box */
+        .track-box { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 12px; margin: 20px 0; }
+        .status-msg { margin-top: 10px; font-weight: bold; min-height: 20px; }
+
+        /* Payment QR Section */
+        .qr-container { margin: 20px 0; border: 2px solid #28a745; padding: 15px; border-radius: 12px; background: #fff; }
+        .qr-container img { width: 210px; height: auto; border-radius: 5px; }
+
+        /* முக்கியமான சிவப்பு பார்டர் கட்டம் */
+        .important-note-box {
+            border: 2px dashed #d9534f;
+            background-color: #fff5f5;
+            border-radius: 10px;
+            margin: 20px 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .important-note-box p { color: #a94442; font-size: 14px; font-weight: 500; margin: 0; line-height: 1.6; }
+
+        .price-breakup { text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #eee; }
+        .price-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="page">
+        <div style="font-size: 50px;">🛍️</div>
+        <h2>Welcome to Md Shop</h2>
+        <p>Best Products at Low Price</p>
+        
+        <div class="track-box">
+            <h4 style="margin: 0 0 10px 0;">Track Your Order Status</h4>
+            <input type="text" id="trackID" placeholder="Enter Order ID (eg: md20041)">
+            <button onclick="checkStatus()" style="background-color: #007bff; margin-top: 5px;">Search Status</button>
+            <div id="statusDisplay" class="status-msg"></div>
+        </div>
+
+        <hr style="border: 0.5px solid #eee; margin: 25px 0;">
+        <button onclick="showPage('page2')" style="background-color: #28a745;">Order New Product</button>
+    </div>
+
+    <div id="page2" class="page">
+        <div style="font-size: 35px;">🧾</div>
+        <h2>Delivery Details</h2>
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="text" id="address" placeholder="Door No, Street Name">
+        <input type="text" id="landmark" placeholder="Landmark">
+        <input type="number" id="pincode" placeholder="Pincode">
+        <input type="number" id="mobile" placeholder="Mobile Number">
+        <input type="number" id="pcs" placeholder="Quantity (Minimum 5)" value="5">
+        <button onclick="goToSummary()">Next to Payment</button>
+        <button onclick="showPage('page1')" style="background: #666; font-size: 13px; margin-top: 10px;">Back to Home</button>
+    </div>
+
+    <div id="page3" class="page">
+        <div style="font-size: 35px;">💳</div>
+        <h2>Payment Details</h2>
+        
+        <div class="price-breakup">
+            <div class="price-row">
+                <span>Product (₹50 x <span id="displayQty">0</span>):</span>
+                <span id="prodPrice">₹0</span>
+            </div>
+            <div class="price-row">
+                <span>Courier Charges:</span>
+                <span>₹100</span>
+            </div>
+            <div style="display:flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
+                <span>Total Amount:</span>
+                <span id="totalAmount">₹0</span>
+            </div>
+        </div>
+
+        <div class="qr-container">
+            <p style="font-weight: bold; color: #28a745; margin-bottom: 10px;">Scan this QR to Pay:</p>
+            <img src="https://drive.google.com/thumbnail?id=1tN6yf9RvKK7ClMlFwKgq-m-WkhVQE_kt&sz=w500" alt="UPI QR Code">
+        </div>
+
+        <div class="important-note-box">
+            <p>
+                ⚠️ <strong>கவனிக்கவும், Important:</strong> 1 Pouch Is 50 Rs. Minimum 5 Pcs order. 
+                Full box 1200. One box in 24 pcs... (1 pouch la 20 pillows) Available... 📦 💸 
+                <br><br>
+                <strong>NO CASH ON DELIVERY 💱 ONLINE PAYMENT ONLY</strong> 🚚 Delivery 2 or 3 days. 
+                <br><br>
+                🚛 Any doubt: 📞 9488934686
+            </p>
+        </div>
+        
+        <button class="whatsapp-btn" onclick="sendOrder()">Confirm & Send Screenshot via WhatsApp</button>
+        <button style="background: #666; font-size: 13px;" onclick="showPage('page2')">Edit Details</button>
+    </div>
+
+    <script>
+        // *** உங்கள் Apps Script URL-ஐ கீழே உள்ள வரியில் பேஸ்ட் செய்யவும் ***
+        const SCRIPT_URL = "இங்கே_உங்கள்_புதிய_WEB_APP_URL_ஐ_பேஸ்ட்_செய்யவும்"; 
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+            window.scrollTo(0,0);
+        }
+
+        async function checkStatus() {
+            let id = document.getElementById("trackID").value.trim();
+            let display = document.getElementById("statusDisplay");
+            if(!id) return alert("Please enter Order ID!");
+            
+            display.innerText = "Searching...";
+            display.style.color = "#007bff";
+
+            try {
+                let response = await fetch(SCRIPT_URL + "?id=" + id);
+                let status = await response.text();
+                
+                if(status === "Not Found" || status === "") {
+                    display.innerText = "❌ Order ID Not Found!";
+                    display.style.color = "#d9534f";
+                } else {
+                    display.innerText = "📦 Status: " + status;
+                    display.style.color = "#28a745";
+                }
+            } catch (err) {
+                display.innerText = "⚠️ Connection Error!";
+                display.style.color = "#d9534f";
+            }
+        }
+
+        function goToSummary() {
+            let pcs = parseInt(document.getElementById("pcs").value);
+            if(!pcs || pcs < 5) return alert("Minimum order is 5 Pcs!");
+
+            let productTotal = pcs * 50;
+            let grandTotal = productTotal + 100;
+            
+            document.getElementById("displayQty").innerText = pcs;
+            document.getElementById("prodPrice").innerText = "₹" + productTotal;
+            document.getElementById("totalAmount").innerText = "₹" + grandTotal;
+            
+            showPage('page3');
+        }
+
+        function sendOrder() {
+            let lastNum = localStorage.getItem("orderIDCount") || 20040;
+            let nextNum = parseInt(lastNum) + 1;
+            localStorage.setItem("orderIDCount", nextNum);
+            let finalOrderID = "md" + nextNum;
+
+            let details = {
+                name: document.getElementById("name").value,
+                total: document.getElementById("totalAmount").innerText,
+                pcs: document.getElementById("pcs").value
+            };
+
+            let message = "*New Order send!* 🛍️%0A" + 
+                          "*Order ID:* " + finalOrderID + "%0A" + 
+                          "*Name:* " + details.name + "%0A" +
+                          "*Quantity:* " + details.pcs + " pcs%0A" +
+                          "*Total:* " + details.total + "%0A" +
+                          "-----------------------------------%0A" +
+                          "ஆர்டரை உறுதி செய்ய ஸ்கிரீன்ஷாட் கீழே அனுப்பியுள்ளேன்!";
+
+            window.open("https://wa.me/919488934686?text=" + message, "_blank");
+        }
+    </script>
+</body>
+</html>
